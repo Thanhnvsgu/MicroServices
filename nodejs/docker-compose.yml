@@ -1,0 +1,43 @@
+version: "3.6"
+
+networks:
+  thanhetnproj:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/16
+
+volumes:
+  mongodata:
+
+services:
+
+  mongo:
+    image: mongo:3.4.23-xenial
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: P@ssw0rd
+    volumes:
+      - mongodata:/data/db/
+    ports:
+      - 27017:27017
+    networks:
+      thanhetnproj:
+        ipv4_address: 10.0.0.2
+
+  mongo-express:
+    image: mongo-express:latest
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: 10.0.0.2
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: P@ssw0rd
+    depends_on:
+      - mongo
+    ports:
+      - 8081:8081
+    networks:
+      thanhetnproj:
+        ipv4_address: 10.0.0.3
+

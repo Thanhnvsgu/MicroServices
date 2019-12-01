@@ -1,0 +1,12 @@
+version: '3.6'
+
+services:
+
+  thanhetn:
+    container_name: thanhetn1997
+    image: nginx
+    volumes:
+      - .:/usr/share/nginx/html
+    restart: always
+    ports:
+      - 90:80
