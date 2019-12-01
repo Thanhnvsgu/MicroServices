@@ -8,7 +8,7 @@ namespace AccountService.Models
 {
     public class DBConnect
     {
-        private MySqlConnection connection;
+        public MySqlConnection connection;
         private string server;
         private string port;
         private string database;
@@ -28,7 +28,7 @@ namespace AccountService.Models
             port = DB_PORT != null ? DB_PORT : "3306";
 
             database = "db";
-            uid = "user";
+            uid = "root";
             password = "P@ssw0rd";
             string connectionString;
             connectionString = "SERVER=" + server + ";" + "PORT=" + DB_PORT + ";" + "DATABASE=" +

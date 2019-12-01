@@ -1,7 +1,4 @@
-FROM mcr.microsoft.com/windows/servercore/iis
-
-RUN powershell -NoProfile -Command Remove-Item -Recurse C:\inetpub\wwwroot\*
-
+FROM mcr.microsoft.com/dotnet/framework/aspnet:4.7.2-windowsservercore-ltsc2019
+ARG source
 WORKDIR /inetpub/wwwroot
-
-COPY ./ .
+COPY . .

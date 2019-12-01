@@ -169,3 +169,16 @@ D:\MicroServices\dotnet\AccountService\AccountService\obj\Release\AccountService
 D:\MicroServices\dotnet\AccountService\AccountService\obj\Release\AccountService.csproj.CopyComplete
 D:\MicroServices\dotnet\AccountService\AccountService\obj\Release\AccountService.dll
 D:\MicroServices\dotnet\AccountService\AccountService\obj\Release\AccountService.pdb
+D:\MicroServices\dotnet\AccountService\AccountService\bin\EntityFramework.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\EntityFramework.SqlServer.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.Entity.EF6.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.EntityFramework.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\Google.Protobuf.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\BouncyCastle.Crypto.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\Renci.SshNet.dll
+D:\MicroServices\dotnet\AccountService\AccountService\bin\EntityFramework.xml
+D:\MicroServices\dotnet\AccountService\AccountService\bin\EntityFramework.SqlServer.xml
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.xml
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.Entity.EF6.xml
+D:\MicroServices\dotnet\AccountService\AccountService\bin\MySql.Data.EntityFramework.xml
