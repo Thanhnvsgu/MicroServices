@@ -1,23 +1,17 @@
-﻿using AccountService.Dao;
-using AccountService.Models.EF;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
+using System.Web;
+using System.Web.Mvc;
 
 namespace AccountService.Controllers
 {
-    [RoutePrefix("api/v1/pokemon")]
-    public class PokemonController : ApiController
+    public class PokemonController : Controller
     {
-        [Route("all")]
-        public IHttpActionResult GetPokemons()
+        // GET: Pokemon
+        public ActionResult Index()
         {
-            PokemonDao pokemonDao = new PokemonDao();
-            
-            return Ok(pokemonDao.pokemons());
+            return View();
         }
     }
 }
