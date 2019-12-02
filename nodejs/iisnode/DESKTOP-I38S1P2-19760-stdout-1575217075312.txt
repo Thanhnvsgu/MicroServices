@@ -1,2 +1,0 @@
---------------------
-RESTful api start on port \\.\pipe\1927d711-a60d-4c2b-97ce-aee34c8132c3
