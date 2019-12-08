@@ -1,5 +1,5 @@
 @echo off
-[92m
+echo [92m
 git --version
 git status
 git add .
