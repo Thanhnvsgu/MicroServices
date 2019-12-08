@@ -1,5 +1,5 @@
 build_dockerfile.bat
-REM docker-compose down
-REM docker network prune
-REM y
-REM docker-compose up
+docker-compose down
+docker network prune
+y
+docker-compose up
