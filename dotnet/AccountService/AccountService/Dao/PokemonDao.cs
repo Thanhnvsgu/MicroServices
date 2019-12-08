@@ -26,10 +26,12 @@ namespace AccountService.Dao
 
             List<Pokemon> pokemons = new List<Pokemon>();
 
-            Pokemon pokemon = new Pokemon();
 
             while (dataReader.Read())
             {
+
+                Pokemon pokemon = new Pokemon();
+
                 pokemon.id = Convert.ToInt32(dataReader["ID"] + "");
                 pokemon.name = dataReader["NAME"] + "";
                 pokemon.species = dataReader["SPECIES"] + "";

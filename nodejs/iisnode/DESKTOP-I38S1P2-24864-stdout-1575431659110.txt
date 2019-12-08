@@ -1,0 +1,21 @@
+--------------------
+RESTful api start on port \\.\pipe\f2a91f7d-55b8-4fad-ab71-5826745cc4c2
+---begin---
+------ Connection Url -------
+mongodb://root:P%40ssw0rd@localhost:27017/
+--return db--
+[]
+--- Pokemon Player ---
+{ id: '5gg11b' }
+[ { _id: 5de727461ad59b29e3e7b5d3,
+    id: 'xx9912',
+    playerId: '5gg11b',
+    pokemonId: 1,
+    natureId: 1,
+    iv_hp: 20,
+    iv_attack: 31,
+    iv_def: 12,
+    iv_spatk: 15,
+    iv_spdef: 22,
+    iv_speed: 1,
+    createDate: '' } ]

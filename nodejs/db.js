@@ -1,13 +1,14 @@
 'use strict'
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 const mongodb = require("mongodb").MongoClient;
 
-let dbport = process.env.NODEJSSERVER_DB_PORT;
-let dbhost = process.env.NODEJSSERVER_DB_HOST;
+let dbport = process.env.MONGO_API_DB_PORT;
+let dbhost = process.env.MONGO_API_DB_HOST;
 
 const url = `mongodb://root:P%40ssw0rd@${dbhost == null ? 'localhost' : dbhost}:${dbport == null ? '27017' : dbport}/`;
-
-
 
 function getdb(){
 
@@ -20,7 +21,7 @@ function getdb(){
             }
             var dbo = db.db("demo");
             // var query = { address: "Park Lane 38" };
-    
+
             console.log("------- Test Db ---------");
             console.log(dbo);
 
@@ -81,7 +82,7 @@ module.exports = {
                     reject(err);
                     throw err;
                 }
-                var dbo = db.db("demo");
+                var dbo = db.db("db");
                 // var query = { address: "Park Lane 38" };
         
                 // console.log("------- Test Db ---------");
@@ -89,9 +90,14 @@ module.exports = {
 
                 // console.log(dbo);
 
-                dbo.collection("user").find({}).toArray(function(err, result){
+                dbo.collection("Player").find({}).toArray(function(err, result){
                     console.log(result);
                 });
+
+                console.log("------ Connection Url -------");
+                console.log(url);
+                console.log(process.env.MONGO_API_DB_PORT);
+                console.log(process.env.M2_HOME);
 
                 console.log("--return db--");
                 resolve(db);

@@ -2,6 +2,7 @@
 
 const util = require('util')
 const db = require('./db')
+const uuidv1 = require('uuid/v1')
 
 module.exports = {
     get: (req, res) => {
@@ -9,10 +10,56 @@ module.exports = {
         var promise = db.testPromise();
         var promise_2 = db.getdb();
 
-        promise_2.then(function(e){
-            var t = e.db("demo").collection("user").find().toArray(function(err, result){
+        promise_2.then(function (e) {
+            var t = e.db("demo").collection("Player").find().toArray(function (err, result) {
                 console.log(result);
                 res.json(result);
+            });
+        });
+    },
+    allplayerpkm: (req, res) => {
+        var promise = db.testPromise();
+        var promise_2 = db.getdb();
+
+        promise_2.then(function (e) {
+
+            var t = e.db("demo").collection("PokemonPlayer").find({ playerId: req.params.id }).toArray(function (err, result) {
+                console.log("--- Pokemon Player ---")
+                console.log(req.params);
+                console.log(result);
+                res.json(result);
+            });
+
+        });
+    },
+    insertpokemon: (req, res) => {
+        var promise = db.testPromise();
+        var promise_2 = db.getdb();
+
+        promise_2.then(function (e) {
+
+            const _uuid = require('uuid/v1')
+
+
+            console.log("-- Insert --");
+            console.log(req.body);
+            console.log(req.params);
+            console.log(req.query);
+
+            var t = e.db("demo").collection("PokemonPlayer").insertOne({
+                id: _uuid(),
+                playerId: req.body.playerId,
+                pokemonId: req.body.pokemonId,
+                natureId: req.body.natureId,
+                "iv_hp": req.body.iv_hp,
+                "iv_attack": req.body.iv_attack,
+                "iv_def": req.body.iv_def,
+                "iv_spatk": req.body.iv_spatk,
+                "iv_spdef": req.body.iv_spdef,
+                "iv_speed": req.body.iv_speed,
+                "createDate": new Date()
+            }, function(err,result){
+                res.json({"message": "Thành công !!!"});
             });
         });
     }
