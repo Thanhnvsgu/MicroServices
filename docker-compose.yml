@@ -1,0 +1,87 @@
+version: "3.6"
+
+networks:
+  iis-demo:
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.0.0.0/16
+
+services:
+
+  mysql_db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'db'
+      # So you don't have to use root, but you can if you like
+      MYSQL_USER: 'user'
+      # You can use whatever password you like
+      MYSQL_PASSWORD: 'P@ssw0rd'
+      # Password for root access
+      MYSQL_ROOT_PASSWORD: 'P@ssw0rd'
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>
+      - '3306:3306'
+    expose:
+      # Opens port 3306 on the container
+      - '3306'
+      # Where our data will be persisted
+    volumes:
+      - ./mysql/my-db:/var/lib/mysql
+    networks:
+      iis-demo:
+        ipv4_address: 10.0.0.2
+
+  iis_demo:
+    image: "iis_demo:latest"
+    restart: always
+    depends_on:
+      - mysql_db
+    environment:
+      DOTNET_API_DB_HOST: '10.0.0.2'
+      DOTNET_API_DB_PORT: '3306'
+    ports:
+      - 8000:80
+    networks:
+      iis-demo:
+        ipv4_address: 10.0.0.3
+    # volumes:
+    # - "./:C:/inetpub/logs/LogFiles"
+    # environment:
+    # - "env1=LIVE1"
+    # - "env2=LIVE2"
+    # - "HOSTS=1.2.3.4:TEST.COM"
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: demo
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: P@ssw0rd
+    volumes:
+      - ./mongodb/db:C:/data/db
+    ports:
+      - 27017:27017
+    expose:
+    # Opens port 27017 on the container
+    - '27017'
+    # Where our data will be persisted
+    networks:
+      iis-demo:
+        ipv4_address: 10.0.0.4
+  
+  iisnode_demo:
+    image: iisnode_demo
+    restart: always
+    depends_on:
+      - mongo
+    ports:
+      - 7000:8000
+    environment:
+      MONGO_API_DB_HOST: '10.0.0.4'
+      MONGO_API_DB_PORT: '27017'
+    networks:
+      iis-demo:
+        ipv4_address: 10.0.0.5

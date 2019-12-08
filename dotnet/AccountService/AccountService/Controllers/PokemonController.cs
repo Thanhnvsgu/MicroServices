@@ -13,5 +13,10 @@ namespace AccountService.Controllers
         {
             return View();
         }
+        public ActionResult PlayerInfo()
+        {
+            return View();
+        }
+        
     }
 }
