@@ -17,6 +17,17 @@ module.exports = {
             });
         });
     },
+    getplayer: (req, res) => {
+        var promise = db.testPromise();
+        var promise_2 = db.getdb();
+
+        promise_2.then(function (e) {
+            var t = e.db("demo").collection("Player").find({ playerId: req.params.id }).toArray(function (err, result) {
+                console.log(result);
+                res.json(result);
+            });
+        });
+    },
     allplayerpkm: (req, res) => {
         var promise = db.testPromise();
         var promise_2 = db.getdb();

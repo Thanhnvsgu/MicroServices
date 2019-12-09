@@ -17,6 +17,9 @@ namespace AccountService.Controllers
         {
             return View();
         }
-        
+        public ActionResult RandomCatch()
+        {
+            return View();
+        }
     }
 }
