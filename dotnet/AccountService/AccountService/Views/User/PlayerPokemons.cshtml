@@ -1,0 +1,340 @@
+﻿
+@{
+    ViewBag.Title = "PlayerInfo";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5>
+            <b style="color:red"> Player Pokemons Info </b>
+        </h5>
+
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="form"></div>
+        </div>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="grid"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="popup_remove"></div>
+        <div id="popup_detail"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var playerId = Custom.parseJwt(Cookies.get("Token_User")).id;
+
+        var data = {
+            "id": "",
+            "playerId": playerId,
+            "pokemonId": "",
+            "natureId": "",
+            "iv_hp": "",
+            "iv_attack": "",
+            "iv_def": "",
+            "iv_spatk": "",
+            "iv_spdef": "",
+            "iv_speed": "",
+            "shiny": "",
+            "createDate": ""
+        }
+
+        var pkms = [];
+        var natures = [];
+
+        // list pokemon
+        $.ajax({
+            url: Config.dotnetHOST + "api/v1/pokemon/all",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                pkms = e;
+            }
+        });
+
+        // nature
+        $.ajax({
+            url: Config.nodeHOST + "api/v1/nature",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                console.log(e);
+                natures = e;
+            }
+        });
+
+        function cleardata() {
+            data = {
+            "id": "",
+            "playerId": playerId,
+            "pokemonId": "",
+            "natureId": "",
+            "iv_hp": "",
+            "iv_attack": "",
+            "iv_def": "",
+            "iv_spatk": "",
+            "iv_spdef": "",
+            "iv_speed": "",
+            "shiny": "",
+            "createDate": ""
+        }
+            $("#form").dxForm("option", "formData", data);
+        }
+
+        var store = new DevExpress.data.CustomStore({
+            key: "id",
+            load: function (loadOptions) {
+                console.log(data);
+                return $.ajax({
+                    url: Config.nodeHOST + "api/v1/allplayerpokemon/" + playerId,
+                    data: JSON.stringify(data),
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (e) {
+                        return e;
+                    }
+                })
+            },
+            insert: function (values) {
+                // ...
+            },
+            update: function (key, values) {
+                // ...
+            },
+            remove: function (key) {
+                $.ajax({
+                    url: Config.nodeHOST + "api/v1/deleteplayerpokemon/" + key.id,
+                    method: "DELETE",
+                    success: function (e) {
+                        $("#grid").dxDataGrid("refresh");
+                        console.log(e);
+                    }
+                });
+            }
+        });
+
+        //$("#form").dxForm({
+        //    formData: data,
+        //    items: [{
+        //        itemType: "group",
+        //        colCount: 2,
+        //        items: [{
+        //            dataField: "name"
+        //        }, {
+        //            dataField: "species",
+        //            label: {
+        //                text: "Loai"
+        //            },
+        //            editorType: "dxTextBox"
+        //        }, {
+        //            itemType: "group",
+        //            colSpan: 2,
+        //            colCount: 10,
+        //            items: [{ itemType: "empty", colSpan: 4 }, {
+        //                itemType: "button",
+        //                colSpan: 1,
+        //                buttonOptions: {
+        //                    text: "Tim Kiem",
+        //                    type: "success",
+        //                    icon: "search",
+        //                    onClick: function () {
+        //                        $("#grid").dxDataGrid("refresh");
+        //                    }
+        //                }
+        //            }, {
+        //                itemType: "button",
+        //                colSpan: 1,
+        //                buttonOptions: {
+        //                    text: "Lam moi",
+        //                    type: "danger",
+        //                    icon: "refresh",
+        //                    onClick: function () {
+        //                        cleardata();
+        //                    }
+        //                }
+        //            }, { itemType: "empty", colSpan: 4 }]
+        //        }]
+        //    }]
+        //});
+
+        $("#grid").dxDataGrid({
+            dataSource: store,
+            noDataText: 'Không tìm thấy dữ liệu',
+            wordWrapEnabled: true,
+            columnAutoWidth: true,
+            showBorders: true,
+            rowAlternationEnabled: true,
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+                // Adds a new item
+                toolbarItems.push({
+                    widget: 'dxButton',
+                    options: {
+                        icon: 'refresh',
+                        onClick: function () {
+                            cleardata();
+                        }
+                    },
+                    location: 'after'
+                });
+            },
+            columns: [{
+                dataField: "pokemonId"
+            }, "natureId", "iv_hp", "iv_attack", "iv_def", "iv_spatk", "iv_spdef","iv_speed","shiny", {
+                caption: "Chức năng",
+                alignment: 'center',
+                cssClass: "",
+                cellTemplate: function (t, options) {
+                    console.log(options.row.data);
+                    var actions = [
+                        { id: 1, text: "Chi tiet", icon: "info", data: options.row.data, process: function () { popup_detail(options.row.data); } },
+                        { id: 2, text: "Xóa", icon: "remove", data: options.row.data, process: function () { popup_remove(options.row.data); $("#popup_remove").dxPopup("show"); } }
+                        
+                    ];
+                    return $("<span>").dxDropDownButton({
+                        //          icon: "list",
+                        items: actions,
+                        keyExpr: "id",
+                        displayExpr: "text",
+                        onItemClick: function (e) {
+                            e.itemData.process();
+                        }
+                    });
+                }
+            }]
+        });
+
+        function popup_detail(pkm) {
+            //popup detail
+        $("#popup_detail").dxPopup({
+            width: 800,
+            height: 400,
+            title: "Chi tiet",
+            contentTemplate: function () {
+                return $("<div>").dxForm({
+                    formData: pkm,
+                    colCount:3,
+                    items: [{
+                        itemType: "group",
+                        colSpan: 1,
+                        items: [{
+                            template: function () {
+                                if (pkm.shiny)
+                                    return $(`<img width=100% src="${pkms.find(e => e.id == pkm.pokemonId).image_shiny}">`);
+                                return $(`<img width=100% src="${pkms.find(e => e.id == pkm.pokemonId).image}">`);
+                    }
+                }]
+                    }, {
+                            itemType: "group",
+                            colSpan: 2,
+                            colCount: 3,
+                            items: [{
+                                dataField: "name",
+                                colSpan:3,
+                                editorOptions: {
+                                    disabled: true
+                                },
+                                template: function () {
+                                    return pkms.find(e => e.id == pkm.pokemonId).name;
+                                }
+                            }, {
+                                    dataField: "species",
+                                colSpan:2,
+                                editorOptions: {
+                                    disabled: true
+                                    },
+                                    template: function () {
+                                        return pkms.find(e => e.id == pkm.pokemonId).species;
+                                    }
+                            }, {
+                                dataField: "nature",
+                                editorOptions: {
+                                    disabled: true
+                                    },
+                                template: function () {
+                                    return natures.find(e => e.id == pkm.natureId).name;
+                                }
+                            },{
+                                dataField: "iv_hp",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "iv_attack",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "iv_def",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "iv_spatk",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "iv_spdef",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "iv_speed",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            }]
+                            
+                    }]
+                });
+            }
+        });
+
+            $("#popup_detail").dxPopup("show");
+        }
+
+        //popup xoa
+        $("#popup_remove").dxPopup({
+            width: 300,
+            height: 180,
+            title: "Xóa"
+        });
+
+        function popup_remove(keydata) {
+            $("#popup_remove").dxPopup({
+                contentTemplate: function () {
+                    var t = $("<div style='width:100%'>");
+                    t.append("<div class='col-lg-12' style='text-align: center'> <p>Bạn có chắc muốn xóa?</p> </div>");
+                    var k = $("<span>");
+                    k.append($("<span style='margin: 5px'>").dxButton({
+                        type: "success",
+                        text: "Có",
+                        onClick: function () {
+                            store.remove(keydata);
+                            $("#popup_remove").dxPopup("hide");
+                        }
+                    }));
+                    k.append($("<span style='margin: 5px'>").dxButton({
+                        type: "normal",
+                        text: "Không",
+                        onClick: function () {
+                            $("#popup_remove").dxPopup("hide");
+                        }
+                    }));
+                    var h = $("<div class='col-lg-12' style='text-align: center'>").append(k);
+                    t.append(h);
+                    return t;
+                }
+            });
+        }
+    });
+</script>

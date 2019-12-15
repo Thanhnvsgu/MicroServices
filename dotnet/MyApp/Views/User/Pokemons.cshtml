@@ -1,0 +1,285 @@
+﻿
+@{
+    ViewBag.Title = "PlayerInfo";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5> <b style="color:red"> PokemonInfo </b> </h5>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="form"></div>
+        </div>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="grid"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="popup_detail"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var data = {
+            id: "",
+            name: "",
+            species: "",
+            height: "",
+            weight: "",
+            hp: "",
+            attack: "",
+            defense: "",
+            spatk: "",
+            spdef: "",
+            speed: "",
+            image: "",
+            image_shiny: "",
+        }
+        var pkms = [];
+        var natures = [];
+        function cleardata() {
+            data = {
+            id: "",
+            name: "",
+            species: "",
+            height: "",
+            weight: "",
+            hp: "",
+            attack: "",
+            defense: "",
+            spatk: "",
+            spdef: "",
+            speed: "",
+            image: "",
+            image_shiny: "",
+        }
+            $("#form").dxForm("option","formData",data);
+        }
+
+        var store = new DevExpress.data.CustomStore({
+            key: "id",
+            load: function (loadOptions) {
+                console.log(data);
+                return $.ajax({
+                    url: Config.dotnetHOST + "api/v1/pokemon/search",
+                    data: JSON.stringify(data),
+                    type: "POST",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (e) {
+                        return e;
+                    }
+                })
+            },
+            insert: function (values) {
+                // ...
+            },
+            update: function (key, values) {
+                // ...
+            },
+            remove: function (key) {
+
+            }
+        });
+
+        // list pokemon
+        $.ajax({
+            url: Config.dotnetHOST + "api/v1/pokemon/all",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                pkms = e;
+            }
+        });
+
+        // nature
+        $.ajax({
+            url: Config.nodeHOST + "api/v1/nature",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                console.log(e);
+                natures = e;
+            }
+        });
+
+        $("#form").dxForm({
+            formData: data,
+            items: [{
+                itemType: "group",
+                colCount: 2,
+                items: [{
+                    dataField: "name"
+                },{
+                        dataField: "species",
+                        label: {
+                            text:"Loai"
+                        },
+                        editorType: "dxTextBox"
+                    }, {
+                        itemType: "group",
+                        colSpan: 2,
+                        colCount:10,
+                        items: [{itemType: "empty",colSpan:4},{
+                            itemType: "button",
+                            colSpan:1,
+                            buttonOptions: {
+                                text: "Tim Kiem",
+                                type:"success",
+                                icon: "search",
+                                onClick: function () {
+                                    $("#grid").dxDataGrid("refresh");
+                                }
+                            }
+                        },{
+                            itemType: "button",
+                            colSpan:1,
+                            buttonOptions: {
+                                text: "Lam moi",
+                                type: "danger",
+                                icon: "refresh",
+                                onClick: function () {
+                                    cleardata();
+                                }
+                            }
+                        },{itemType: "empty",colSpan:4}]
+                    }]
+            }]
+        });
+
+        $("#grid").dxDataGrid({
+            dataSource: store,
+            noDataText: 'Không tìm thấy dữ liệu',
+            wordWrapEnabled: true,
+            columnAutoWidth: true,
+            showBorders: true,
+            rowAlternationEnabled: true,
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+                // Adds a new item
+                toolbarItems.push({
+                    widget: 'dxButton',
+                    options: {
+                        icon: 'refresh',
+                        onClick: function () {
+                            cleardata();
+                        }
+                    },
+                    location: 'after'
+                });
+            },
+            columns: [{
+                dataField: "name",
+                caption: "UserName"
+            }, {
+                dataField: "species"
+            }, "hp","attack","defense","spatk","spdef","speed" , {
+                caption: "Chức năng",
+                alignment: 'center',
+                cssClass: "",
+                cellTemplate: function (t, options) {
+                    console.log(options.row.data);
+                    var actions = [
+                        { id: 1, text: "Chi tiet", icon: "info", data: options.row.data, process: function () { popup_detail(options.row.data); } }
+                    ];
+                    return $("<span>").dxDropDownButton({
+                        //          icon: "list",
+                        items: actions,
+                        keyExpr: "id",
+                        displayExpr: "text",
+                        onItemClick: function (e) {
+                            e.itemData.process();
+                        }
+                    });
+                }
+            }]
+        });
+
+
+        function popup_detail(pkm) {
+            //popup detail
+        $("#popup_detail").dxPopup({
+            width: 800,
+            height: 400,
+            title: "Chi tiet",
+            contentTemplate: function () {
+                return $("<div>").dxForm({
+                    formData: pkm,
+                    colCount:3,
+                    items: [{
+                        itemType: "group",
+                        colSpan: 1,
+                        items: [{
+                    template: function () {
+                         return $(`<img width=100% src="${pkm.image}">`);
+                    }
+                }]
+                    }, {
+                            itemType: "group",
+                            colSpan: 2,
+                            colCount: 3,
+                            items: [{
+                                dataField: "name",
+                                colSpan:2,
+                                editorOptions: {
+                                    disabled: true
+                                },
+                                template: function () {
+                                    return pkms.find(e => e.id == pkm.id).name;
+                                }
+                            }, {
+                                    dataField: "species",
+                                colSpan:1,
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "hp",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "attack",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "defense",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "spatk",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "spdef",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            },{
+                                dataField: "speed",
+                                editorOptions: {
+                                    disabled: true
+                                }
+                            }]
+                            
+                    }]
+                });
+            }
+        });
+
+            $("#popup_detail").dxPopup("show");
+        }
+
+        
+
+
+    });
+</script>

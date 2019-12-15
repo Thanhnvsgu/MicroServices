@@ -63,7 +63,7 @@ namespace AccountService.Models
                 return false;
             }
         }
-        private bool CloseConnection()
+        public bool CloseConnection()
         {
             try
             {

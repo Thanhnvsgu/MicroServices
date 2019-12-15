@@ -1,0 +1,271 @@
+﻿
+@{
+    ViewBag.Title = "CatchPokemon";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5> <b style="color:red"> Catch Pokemon </b> </h5>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="form"></div>
+        </div>
+        <div class="col-lg-12">
+            <div id="btn_catch"></div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+
+        var url = new URL(window.location.href);
+
+        const playerId = Custom.parseJwt(Cookies.get("Token_User")).id;
+
+        console.log(Custom.parseJwt(Cookies.get("Token_User")));
+        var pkms = [];
+        var players = {};
+        var natures = [];
+
+        var pkm = {
+            playerId: playerId,
+            pokemonId: "",
+            natureId: "",
+            iv_hp: "",
+            iv_attack: "",
+            iv_def: "",
+            iv_spatk: "",
+            iv_spdef: "",
+            iv_speed: "",
+        }
+
+        function cleardata() {
+            pkm = {
+                playerId: playerId,
+                pokemonId: "",
+                natureId: "",
+                iv_hp: "",
+                iv_attack: "",
+                iv_def: "",
+                iv_spatk: "",
+                iv_spdef: "",
+                iv_speed: "",
+            }
+            $("#form").dxForm("option", "formData", pkm);
+            $("#form").dxForm("repaint");
+        }
+
+        // player info
+        $.ajax({
+            url: Config.dotnetHOST + "api/v1/Player/" + playerId,
+            method: "GET",
+            async: false,
+            success: function (e) {
+                console.log(e);
+                players = e;
+            }
+        });
+
+
+        // list pokemon
+        $.ajax({
+            url: Config.dotnetHOST + "api/v1/pokemon/all",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                pkms = e;
+            }
+        });
+
+        // nature
+        $.ajax({
+            url: Config.nodeHOST + "api/v1/nature",
+            method: "GET",
+            async: false,
+            success: function (e) {
+                console.log(e);
+                natures = e;
+            }
+        });
+
+        $("#form").dxForm({
+            formData: pkm,
+            colCount: 3,
+            items: [{
+                itemType: "group",
+                caption: "Image",
+                ColSpan: 1,
+                items: [{
+                    template: function () {
+                        if (pkm.pokemonId != "")
+                            if (pkm.shiny)
+                                return $(`<img width=100% src="${pkms.find(e => e.id == pkm.pokemonId).image_shiny}">`);
+                            else
+                                return $(`<img width=100% src="${pkms.find(e => e.id == pkm.pokemonId).image}">`);
+
+                    }
+                }]
+            },
+            {
+                itemType: "group",
+                colCount: 3,
+                colSpan: 2,
+                caption: "pokemon info",
+                items: [{
+                    dataField: "pokemonId",
+                    label: {
+                        text: "Pokemon"
+                    },
+                    colSpan: 1,
+                    editorOption: {
+                        disabled: true,
+                    },
+                    template: function (t, options) {
+                        console.log(t);
+                        if (pkm.pokemonId != "")
+                            return pkms.find(e => e.id == pkm.pokemonId).name;
+                        return "";
+                    }
+                }, {
+                    dataField: "natureId",
+                    label: {
+                        text: "Nature"
+                    },
+                    colSpan: 1,
+                    editorOption: {
+                        disabled: true
+                    }
+                    ,
+                    template: function (t, options) {
+                        if (pkm.natureId != "")
+                            return natures.find(e => e.id == pkm.natureId).name;
+                        return "";
+                    }
+                }, {
+                    itemType: "empty",
+                    colSpan: 1
+                }, {
+                    dataField: "iv_hp",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true
+                    }
+                }, {
+                    dataField: "iv_attack",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true
+                    }
+                }, {
+                    dataField: "iv_def",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true,
+                    }
+                }, {
+                    dataField: "iv_spatk",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true,
+                    }
+                }, {
+                    dataField: "iv_spdef",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true,
+                    }
+                }, {
+                    dataField: "iv_speed",
+                    colSpan: 1,
+                    editorType: "dxTextBox",
+                    editorOption: {
+                        disabled: true,
+                    }
+                }, {
+                    colSpan: 3,
+                    template: function () {
+                        var t = $("<div style='display:flex'>");
+                        var k = $("<span style='margin:auto'>");
+                        k.append($("<span style='margin:5px'>").dxButton({
+                            type: "success",
+                            text: "Search Pokemon",
+                            onClick: function () {
+                                const _index = Math.floor(Math.random() * pkms.length);
+                                pkm.pokemonId = pkms[_index].id;
+                                pkm.natureId = natures[Math.floor(Math.random() * natures.length)].id;
+                                pkm.iv_attack = Math.floor(Math.random() * 32);
+                                pkm.iv_def = Math.floor(Math.random() * 32);
+                                pkm.iv_hp = Math.floor(Math.random() * 32);
+                                pkm.iv_spatk = Math.floor(Math.random() * 32);
+                                pkm.iv_spdef = Math.floor(Math.random() * 32);
+                                pkm.iv_speed = Math.floor(Math.random() * 32);
+
+                                const v = Math.floor(Math.random() * 100);
+                                if (v == 50) pkm.shiny = true;
+                                else
+                                    pkm.shiny = false;
+                                $("#form").dxForm("option", "formData", pkm);
+                                $("#form").dxForm("repaint");
+                            }
+                        }));
+
+                        k.append($("<span style='margin:5px'>").dxButton({
+                            type: "danger",
+                            text: "Catch Pokemon",
+                            onClick: function () {
+                                console.log(pkm);
+
+                                if (pkm.pokemonId != "" && pkm.pokemonId != undefined && pkm.pokemonId != null)
+                                $.ajax({
+                                    url: Config.nodeHOST + "api/v1/insertplayerpokemon",
+                                    method: "POST",
+                                    async: false,
+                                    data: JSON.stringify(pkm),
+                                    dataType: "json",
+                                    contentType: "application/json; charset=utf-8",
+                                    success: function (e) {
+                                        console.log(e);
+
+                                        Swal.fire({
+                                            title: 'Catch pokemon',
+                                            text: "Bat thanh cong",
+                                            icon: 'sucess'
+                                        }).then((result) => {
+                                           cleardata();
+                                        });
+
+                                        }
+                                });
+                                else
+                                    Swal.fire({
+                                        title: 'Chua tim thay pokemon',
+                                        text: "loi",
+                                        icon: 'error'
+                                    });
+                            }
+                        }));
+
+                        k.append($("<span style='margin:5px'>").dxButton({
+                            type: "default",
+                            text: "Run",
+                            onClick: function () {
+                                cleardata();
+                            }
+                        }));
+                        return t.append(k);
+                    }
+                }
+                ]
+            }]
+        })
+    });
+</script>

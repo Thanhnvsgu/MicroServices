@@ -1,0 +1,247 @@
+﻿
+@{
+    ViewBag.Title = "PlayerInfo";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5> 
+        <b style="color:red"> Player Pokemons Info </b> 
+        <span id="btn_back" style="float:right"></span>
+        </h5>
+        
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="form"></div>
+        </div>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <div id="grid"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="popup_remove"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        var url = new URL(window.location.href);
+
+        var playerId = url.searchParams.get("id");
+
+        var data = {
+            "id": "",
+            "playerId": "",
+            "pokemonId": "",
+            "natureId": "",
+            "iv_hp": "",
+            "iv_attack": "",
+            "iv_def": "",
+            "iv_spatk": "",
+            "iv_spdef": "",
+            "iv_speed": "",
+            "shiny": "",
+            "createDate": ""
+        }
+
+        function cleardata() {
+            data = {
+            "id": "",
+            "playerId": "",
+            "pokemonId": "",
+            "natureId": "",
+            "iv_hp": "",
+            "iv_attack": "",
+            "iv_def": "",
+            "iv_spatk": "",
+            "iv_spdef": "",
+            "iv_speed": "",
+            "shiny": "",
+            "createDate": ""
+        }
+            $("#form").dxForm("option", "formData", data);
+        }
+
+        var store = new DevExpress.data.CustomStore({
+            key: "id",
+            load: function (loadOptions) {
+                console.log(data);
+                return $.ajax({
+                    url: Config.nodeHOST + "api/v1/allplayerpokemon/" + playerId,
+                    data: JSON.stringify(data),
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (e) {
+                        return e;
+                    }
+                })
+            },
+            insert: function (values) {
+                // ...
+            },
+            update: function (key, values) {
+                // ...
+            },
+            remove: function (key) {
+                $.ajax({
+                    url: Config.nodeHOST + "api/v1/deleteplayerpokemon/" + key.id,
+                    method: "DELETE",
+                    success: function (e) {
+                        $("#grid").dxDataGrid("refresh");
+                        console.log(e);
+                    }
+                });
+            }
+        });
+
+        //$("#form").dxForm({
+        //    formData: data,
+        //    items: [{
+        //        itemType: "group",
+        //        colCount: 2,
+        //        items: [{
+        //            dataField: "name"
+        //        }, {
+        //            dataField: "species",
+        //            label: {
+        //                text: "Loai"
+        //            },
+        //            editorType: "dxTextBox"
+        //        }, {
+        //            itemType: "group",
+        //            colSpan: 2,
+        //            colCount: 10,
+        //            items: [{ itemType: "empty", colSpan: 4 }, {
+        //                itemType: "button",
+        //                colSpan: 1,
+        //                buttonOptions: {
+        //                    text: "Tim Kiem",
+        //                    type: "success",
+        //                    icon: "search",
+        //                    onClick: function () {
+        //                        $("#grid").dxDataGrid("refresh");
+        //                    }
+        //                }
+        //            }, {
+        //                itemType: "button",
+        //                colSpan: 1,
+        //                buttonOptions: {
+        //                    text: "Lam moi",
+        //                    type: "danger",
+        //                    icon: "refresh",
+        //                    onClick: function () {
+        //                        cleardata();
+        //                    }
+        //                }
+        //            }, { itemType: "empty", colSpan: 4 }]
+        //        }]
+        //    }]
+        //});
+
+        $("#grid").dxDataGrid({
+            dataSource: store,
+            noDataText: 'Không tìm thấy dữ liệu',
+            wordWrapEnabled: true,
+            columnAutoWidth: true,
+            showBorders: true,
+            rowAlternationEnabled: true,
+            onToolbarPreparing: function (e) {
+                var toolbarItems = e.toolbarOptions.items;
+                // Adds a new item
+                toolbarItems.push({
+                    widget: 'dxButton',
+                    options: {
+                        icon: 'refresh',
+                        onClick: function () {
+                            cleardata();
+                        }
+                    },
+                    location: 'after'
+                });
+                toolbarItems.push({
+                    widget: 'dxButton',
+                    options: {
+                        icon: 'add',
+                        onClick: function () {
+                            //cleardata();
+                            // npage("dsdetail", Config.HOST + "dsdetail.jsp");
+                            window.location.href = "/Admin/PlayersPokemonsDetails?playerId=" + playerId;
+                        }
+                    },
+                    location: 'after'
+                });
+            },
+            columns: [{
+                dataField: "pokemonId"
+            }, "natureId", "iv_hp", "iv_attack", "iv_def", "iv_spatk", "iv_spdef","iv_speed","shiny", {
+                caption: "Chức năng",
+                alignment: 'center',
+                cssClass: "",
+                cellTemplate: function (t, options) {
+                    console.log(options.row.data);
+                    var actions = [
+                        { id: 1, text: "Sửa", icon: "edit", data: options.row.data, process: function () { window.location.href = "/Admin/PlayersPokemonsDetails?playerId=" + options.row.data.playerId + "&pokemonId=" + options.row.data.pokemonId; } },
+                        { id: 2, text: "Xóa", icon: "remove", data: options.row.data, process: function () { popup_remove(options.row.data); $("#popup_remove").dxPopup("show"); } }
+                    ];
+                    return $("<span>").dxDropDownButton({
+                        //          icon: "list",
+                        items: actions,
+                        keyExpr: "id",
+                        displayExpr: "text",
+                        onItemClick: function (e) {
+                            e.itemData.process();
+                        }
+                    });
+                }
+            }]
+        });
+
+        //popup xoa
+        $("#popup_remove").dxPopup({
+            width: 300,
+            height: 180,
+            title: "Xóa"
+        });
+
+        function popup_remove(keydata) {
+            $("#popup_remove").dxPopup({
+                contentTemplate: function () {
+                    var t = $("<div style='width:100%'>");
+                    t.append("<div class='col-lg-12' style='text-align: center'> <p>Bạn có chắc muốn xóa?</p> </div>");
+                    var k = $("<span>");
+                    k.append($("<span style='margin: 5px'>").dxButton({
+                        type: "success",
+                        text: "Có",
+                        onClick: function () {
+                            store.remove(keydata);
+                            $("#popup_remove").dxPopup("hide");
+                        }
+                    }));
+                    k.append($("<span style='margin: 5px'>").dxButton({
+                        type: "normal",
+                        text: "Không",
+                        onClick: function () {
+                            $("#popup_remove").dxPopup("hide");
+                        }
+                    }));
+                    var h = $("<div class='col-lg-12' style='text-align: center'>").append(k);
+                    t.append(h);
+                    return t;
+                }
+            });
+        }
+
+        $("#btn_back").dxButton({
+            type: "default",
+            text: "Back",
+            onClick: function () {
+                window.location.href = "/Admin/Players";
+            }
+        })
+    });
+</script>

@@ -1,0 +1,144 @@
+﻿
+@{
+    ViewBag.Title = "PlayersDetails";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5> <b style="color:red"> PlayerDetails </b> </h5>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <form action="" id="form_submit">
+                <div id="form"></div>
+            </form>
+            
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+
+        var url = new URL(window.location.href);
+
+        var id = url.searchParams.get("id");
+
+        var data = {
+            id: "",
+            username: "",
+            password: "",
+            sex: "",
+            birthday: "",
+            national: ""
+        }
+
+        if (id != undefined && id != null && id != "")
+            $.ajax({
+                url: Config.dotnetHOST + "api/v1/player/" + id,
+                async: false,
+                method: "GET",
+                success: function (e) {
+                    data = e;
+                }
+            })
+
+        function save() {
+            if (data.id != "" && data.id != undefined && data.id != null) {
+
+                $.ajax({
+                    url: Config.dotnetHOST + "api/v1/player/edit",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        window.location.href = "/Admin/Players";
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    url: Config.dotnetHOST + "api/v1/player/insert",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        window.location.href = "/Admin/Players";
+                    }
+                });
+            }
+        }
+
+
+        $("#form").dxForm({
+            formData: data,
+            items: [{
+                itemType: "group",
+                colCount: 2,
+                items: [{
+                    dataField: "username",
+                    validationRules: [{
+                        type: "required",
+                        message: "Bạn chưa nhập username"
+                    }],
+                }, {
+                        dataField: "password",
+                    validationRules: [{
+                        type: "required",
+                        message: "Bạn chưa nhập password"
+                    }]
+                    }, {
+                    dataField: "birthday",
+                    editorType: "dxDateBox"
+                }, {
+                    dataField: "sex",
+                    editorType: "dxSelectBox",
+                    editorOptions: {
+                        placeholder: "Chon...",
+                        valueExpr: "id",
+                        displayExpr: "name",
+                        dataSource: [{ id: 0, name: "Nam" }, { id: 1, name: "Nu" }]
+                    }
+                }, {
+                        dataField: "national",
+                        
+                    }, {itemType:"empty"}, {
+                    itemType: "group",
+                    colSpan: 2,
+                    colCount: 10,
+                    items: [{ itemType: "empty", colSpan: 4 }, {
+                        itemType: "button",
+                        colSpan: 1,
+                        buttonOptions: {
+                            text: "Save",
+                            type: "success",
+                            icon: "save",
+                            useSubmitBehavior: true,
+                            onClick: function () {
+                                
+                            }
+                        }
+                    }, {
+                        itemType: "button",
+                        colSpan: 1,
+                        buttonOptions: {
+                            text: "Back",
+                            type: "danger",
+                            icon: "refresh",
+                            onClick: function () {
+                                window.location.href = "/Admin/Players";
+                            }
+                        }
+                    }, { itemType: "empty", colSpan: 4 }]
+                }]
+            }]
+        });
+
+        $("#form_submit").on("submit", function (e) {
+            e.preventDefault(); 
+            save();
+        });
+    });
+</script>
+

@@ -1,4 +1,4 @@
-﻿config = {
-    dotnetHOST: "http://localhost:60000/"
-    nodeHOST: "http://localhost:88/"
+﻿var Config = {
+    dotnetHOST: "http://localhost:65000/",
+    nodeHOST: "http://localhost:4000/"
 }

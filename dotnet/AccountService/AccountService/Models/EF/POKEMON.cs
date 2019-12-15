@@ -7,7 +7,7 @@ namespace AccountService.Models.EF
 {
     public class Pokemon
     {
-        public int id { get; set; }
+        public string id { get; set; }
 
         public string name { get; set; }
 
@@ -30,6 +30,8 @@ namespace AccountService.Models.EF
         public string speed { get; set; }
 
         public string image { get; set; }
+
+        public string image_shiny { get; set; }
 
 
     }

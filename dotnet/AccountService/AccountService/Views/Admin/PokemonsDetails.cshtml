@@ -1,0 +1,172 @@
+﻿
+@{
+    ViewBag.Title = "PlayersDetails";
+    Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="col-lg-12" style="background-color: #f2f2f2l">
+    <div class="row custom_box">
+        <h5> <b style="color:red"> PokemonDetails </b> </h5>
+    </div>
+    <div class="row custom_box">
+        <div class="col-lg-12">
+            <form action="" id="form_submit">
+                <div id="form"></div>
+            </form>
+
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+
+
+        var url = new URL(window.location.href);
+
+        var id = url.searchParams.get("id");
+
+        var data = {
+            id: "",
+            name: "",
+            species: "",
+            height: "",
+            weight: "",
+            hp: "",
+            attack: "",
+            defense: "",
+            spatk: "",
+            spdef: "",
+            speed: "",
+            image: "",
+            image_shiny: "",
+        }
+
+        if (id != undefined && id != null && id != "")
+            $.ajax({
+                url: Config.dotnetHOST + "api/v1/pokemon/" + id,
+                async: false,
+                method: "GET",
+                success: function (e) {
+                    data = e;
+                }
+            })
+
+        function save() {
+            if (data.id != "" && data.id != undefined && data.id != null) {
+
+                $.ajax({
+                    url: Config.dotnetHOST + "api/v1/pokemon/edit",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        window.location.href = "/Admin/Pokemons";
+                    }
+                });
+            } else {
+
+                $.ajax({
+                    url: Config.dotnetHOST + "api/v1/pokemon/insert",
+                    method: "POST",
+                    data: JSON.stringify(data),
+                    contentType: "application/json; charset=utf-8",
+                    success: function () {
+                        window.location.href = "/Admin/Pokemons";
+                    }
+                });
+            }
+        }
+
+
+        $("#form").dxForm({
+            formData: data,
+            items: [{
+                itemType: "group",
+                colCount: 2,
+                items: [{
+                    dataField: "name",
+                    validationRules: [{
+                        type: "required",
+                        message: "Bạn chưa nhập ten"
+                    }],
+                }, "species", "height", "weight", "hp", "attack", "defense", "spatk", "spdef", "speed",
+                    {
+                        itemType: "group",
+                        colSpan: 2,
+                        colCount: 2,
+                        caption: "Hinh anh",
+                        items: [{
+                            label: {
+                                text: "Image"
+                            },
+                            template: function () {
+                                return $("<div>").dxFileUploader({
+                                    selectButtonText: "Chon",
+                                labelText: "hoac keo file",
+                                uploadMethod: "POST",
+                                uploadMode:"instantly",
+                                uploadUrl: "/api/v1/upload/image",
+                                onUploaded: function (t) {
+                                    $("#form").dxForm("option", "formData.image",  "/Uploads/" + t.file.name);
+                                    console.log(t.file);
+                                }
+                                });
+                            }
+                        },{
+                            label: {
+                                text: "Shiny Image"
+                            },
+                            template: function () {
+                                return $("<div>").dxFileUploader({
+                                    selectButtonText: "Chon",
+                                labelText: "hoac keo file",
+                                uploadMethod: "POST",
+                                uploadMode:"instantly",
+                                uploadUrl: "/api/v1/upload/image",
+                                onUploaded: function (t) {
+                                    $("#form").dxForm("option", "formData.image_shiny",  "/Uploads/" + t.file.name);
+                                    console.log(t.file);
+                                }
+                                });
+                            }
+                        }]
+                    },
+                    {
+                    itemType: "group",
+                    colSpan: 2,
+                    colCount: 10,
+                    items: [{ itemType: "empty", colSpan: 4 }, {
+                        itemType: "button",
+                        colSpan: 1,
+                        buttonOptions: {
+                            text: "Save",
+                            type: "success",
+                            icon: "save",
+                            useSubmitBehavior: true,
+                            onClick: function () {
+
+                            }
+                        }
+                    }, {
+                        itemType: "button",
+                        colSpan: 1,
+                        buttonOptions: {
+                            text: "Back",
+                            type: "danger",
+                            icon: "refresh",
+                            onClick: function () {
+                                window.location.href = "/Admin/Pokemons";
+                            }
+                        }
+                    }, { itemType: "empty", colSpan: 4 }]
+                }]
+            }]
+        });
+
+        $("#form_submit").on("submit", function (e) {
+            e.preventDefault();
+            save();
+        });
+    });
+</script>
+

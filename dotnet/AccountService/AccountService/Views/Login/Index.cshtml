@@ -1,0 +1,138 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+
+    <link href="~/Scripts/DevExpressDevExtreme-Complete-19.1.6/Lib/css/dx.common.css" rel="stylesheet" />
+    <link href="~/Scripts/DevExpressDevExtreme-Complete-19.1.6/Lib/css/dx.light.css" rel="stylesheet" />
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" />
+
+    <script src="~/Scripts/jquery-3.3.1.min.js"></script>
+    <script src="~/Scripts/DevExpressDevExtreme-Complete-19.1.6/Lib/js/dx.all.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script src="~/Scripts/sweetalert2.js"></script>
+    <script src="~/Scripts/cookies.min.js"></script>
+    <script src="~/Scripts/Custom.js"></script>
+    <script src="~/Scripts/Config.js"></script>
+
+</head>
+<body style="display:flex;height:100vh;width:100vw;background-image:url('/images/bg_login.jpg');background-repeat: no-repeat;background-size: cover">
+    <span style="margin:auto;min-width:400px;background-color:#f1f0f0;padding:10px;box-shadow:0px 0px 10px #f2f2f2;border-radius:5px">
+        <h3 style="text-align:center;font-weight:bold"> Dang Nhap </h3>
+        <form id="form_submit" action="">
+            <div id="form"></div>
+        </form>
+    </span>
+</body>
+</html>
+<script>
+    $(document).ready(function () {
+
+        var data = {
+            username: "",
+            password: "",
+            grant_type: "password"
+        }
+
+        $("#form").dxForm({
+            formData: data,
+            items: [{
+                itemType: "group",
+                colCount: 1,
+                items: [{
+                    dataField: "username",
+                    editorType: "dxTextBox",
+                }, {
+                    dataField: "password",
+                    editorType: "dxTextBox",
+                    editorOptions: {
+                        mode: 'password',
+                    }
+                }]
+            }, {
+                itemType: "group",
+                colCount: 10,
+                items: [{
+                    itemType: "empty",
+                    colSpan: 4
+                }, {
+                    colSpan: 1,
+                    itemType: "button",
+                    buttonOptions: {
+                        type: "success",
+                        text: "Login",
+                        useSubmitBehavior: true,
+                        onClick: function () {
+
+                        }
+                    }
+                }, {
+                    colSpan: 1,
+                    itemType: "button",
+                    buttonOptions: {
+                        type: "success",
+                        text: "Clear"
+
+                    }
+                }, {
+                    itemType: "empty",
+                    colSpan: 4
+                }]
+            }
+            ]
+        });
+
+        $("#form_submit").on("submit", function (e) {
+            e.preventDefault();
+            login();
+        });
+
+        function login() {
+            $.ajax({
+                url: Config.dotnetHOST + "token",
+                type: "POST",
+                data: data,
+                headers: {
+                    "Authorization": "Basic " + btoa("thanhetn:thanhetnP@ssw0rd")
+                },
+                success: function (data, textStatus, jqxhr) {
+                    Cookies.set('Token_User', data.access_token, { expires: 1 / 24 / 1 }); // 1 hour
+                    var info = Custom.parseJwt(Cookies.get('Token_User'));
+
+                    Swal.fire({
+                        title: 'Dang Nhap',
+                        text: "Dang nhap thanh cong",
+                        icon: 'sucess',
+                        timer: 1500
+                    }).then((result) => {
+                        if (info.role.findIndex(e => e == "ROLE_ADMIN") != -1) {
+                        console.log("ADMIN");
+                        window.location.href = "/Admin/Players";
+                    }
+                    else if (info.role.findIndex(e => e == "ROLE_USER") != -1) {
+                        console.log("USER");
+                        window.location.href = "/User/Player";
+                    }
+                    });
+                },
+                error: function (event, jqxhr, settings, exception) {
+                    console.log(event.status);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Loi',
+                        text: 'Tài khoản hoặc mật khẩu không đúng',
+                        footer: ''
+                    })
+                }
+            });
+        }
+    });
+</script>
